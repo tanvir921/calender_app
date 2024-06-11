@@ -14,17 +14,67 @@ class CalendarApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: CalendarScreen(),
+      home: MainScreen(),
     );
   }
 }
 
-class CalendarScreen extends StatefulWidget {
+class MainScreen extends StatefulWidget {
   @override
-  _CalendarScreenState createState() => _CalendarScreenState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class _MainScreenState extends State<MainScreen> {
+  int _currentIndex = 0;
+  final List<Widget> _screens = [
+    HomeScreen(),
+    Screen2(),
+    Screen3(),
+    Screen4(),
+  ];
+
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: _onTabTapped,
+        currentIndex: _currentIndex,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   DateTime currentDate = DateTime.now();
   Map<String, dynamic> data = {};
 
@@ -55,29 +105,43 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final res = await fetchCalendarData(category);
     setState(() {
       data = res;
+      data['category'] = category; // Set the category here
     });
   }
 
- Future<Map<String, dynamic>> fetchCalendarData(String category) async {
-  final response = await http.get(Uri.parse('https://calendar.sohojbazar.com/api/calendar?category=$category'));
-  
-  if (response.statusCode == 200) {
-    //print(response.body);
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load calendar data');
+  Future<Map<String, dynamic>> fetchCalendarData(String category) async {
+    final response = await http.get(Uri.parse(
+        'https://calendar.sohojbazar.com/api/calendar?category=$category'));
+
+    if (response.statusCode == 200) {
+      //print(response.body);
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load calendar data');
+    }
   }
-}
 
   void previousMonth() {
     setState(() {
-      currentDate = DateTime(currentDate.year, currentDate.month - 1);
+      if (currentDate.year == 2024 && currentDate.month == 1) {
+        // Stay in January 2024
+        currentDate = DateTime(2024, 1);
+      } else {
+        // Move to the previous month
+        currentDate = DateTime(currentDate.year, currentDate.month - 1);
+      }
     });
   }
 
   void nextMonth() {
     setState(() {
-      currentDate = DateTime(currentDate.year, currentDate.month + 1);
+      if (currentDate.year == 2024 && currentDate.month == 12) {
+        // Stay in December 2024
+        currentDate = DateTime(2024, 12);
+      } else {
+        // Move to the next month
+        currentDate = DateTime(currentDate.year, currentDate.month + 1);
+      }
     });
   }
 
@@ -91,7 +155,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calendar'),
+        title: const Text('Mewshift'),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
@@ -100,29 +165,53 @@ class _CalendarScreenState extends State<CalendarScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: ['A', 'B', 'C', 'D'].map((category) {
-                return ElevatedButton(
-                  onPressed: () => loadCalendar(category),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: data['category'] == category ? Colors.red : Colors.green,
+                return GestureDetector(
+                  onTap: () {
+                    loadCalendar(category);
+                  },
+                  child: Container(
+                    height: 30,
+                    width: 60,
+                    margin: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: data['category'] == category
+                          ? Colors.purple
+                          : Colors.white,
+                      border: Border.all(
+                        color: data['category'] == category
+                            ? Colors.purple
+                            : Colors.black,
+                      ),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Center(
+                      child: Text(
+                        category,
+                        style: TextStyle(
+                          color: data['category'] == category
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                    ),
                   ),
-                  child: Text(category),
                 );
               }).toList(),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               "${months[currentDate.month - 1]} ${currentDate.year}",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: Icon(Icons.chevron_left),
+                  icon: const Icon(Icons.chevron_left),
                   onPressed: previousMonth,
                 ),
                 IconButton(
-                  icon: Icon(Icons.chevron_right),
+                  icon: const Icon(Icons.chevron_right),
                   onPressed: nextMonth,
                 ),
               ],
@@ -130,98 +219,221 @@ class _CalendarScreenState extends State<CalendarScreen> {
             Table(
               children: [
                 TableRow(
-                  children: days.map((day) => Center(child: Text(day))).toList(),
+                  children:
+                      days.map((day) => Center(child: Text(day))).toList(),
                 ),
                 ...generateCalendar(),
               ],
             ),
-            SizedBox(height: 20),
-            DropdownButton<int>(
-              value: currentDate.month,
-              items: List.generate(12, (index) {
-                return DropdownMenuItem(
-                  value: index + 1,
-                  child: Text(months[index]),
-                );
-              }),
-              onChanged: (month) {
-                if (month != null) {
-                  jumpToDate(currentDate.year, month);
-                }
-              },
-            ),
-            DropdownButton<int>(
-              value: currentDate.year,
-              items: List.generate(10, (index) {
-                return DropdownMenuItem(
-                  value: DateTime.now().year + index,
-                  child: Text((DateTime.now().year + index).toString()),
-                );
-              }),
-              onChanged: (year) {
-                if (year != null) {
-                  jumpToDate(year, currentDate.month);
-                }
-              },
-            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
- List<TableRow> generateCalendar() {
-  List<TableRow> rows = [];
-  int daysInMonth = DateTime(currentDate.year, currentDate.month + 1, 0).day;
-  int firstDay = DateTime(currentDate.year, currentDate.month, 1).weekday % 7; // Adjusting firstDay calculation
+  List<TableRow> generateCalendar() {
+    List<TableRow> rows = [];
+    int daysInMonth = DateTime(currentDate.year, currentDate.month + 1, 0).day;
+    int firstDay = DateTime(currentDate.year, currentDate.month, 1).weekday %
+        7; // Adjusting firstDay calculation
 
-  int date = 1;
-  for (int i = 0; i < 6; i++) {
-    List<Widget> cells = [];
-    for (int j = 0; j < 7; j++) {
-      if (i == 0 && j < firstDay) {
-        cells.add(Container()); // Empty cell
-      } else if (date > daysInMonth) {
-        cells.add(Container()); // Empty cell
-      } else {
-        String shift = '';
-        bool isHoliday = false;
-        if (data.containsKey(months[currentDate.month - 1]) && data[months[currentDate.month - 1]].containsKey(date.toString())) {
-          shift = data[months[currentDate.month - 1]][date.toString()]['shift'];
-          isHoliday = data[months[currentDate.month - 1]][date.toString()]['is_holiday'];
-        }
-
-        Widget cellWidget;
-        if (isHoliday) {
-          cellWidget = Icon(Icons.local_hospital, color: Colors.red); // Holiday indicator
-        } else if (shift == 'Morning') {
-          cellWidget = Icon(Icons.wb_sunny, color: Colors.orange); // Morning shift icon
-        } else if (shift == 'Night') {
-          cellWidget = Icon(Icons.nights_stay, color: Colors.blue); // Night shift icon
+    int date = 1;
+    for (int i = 0; i < 6; i++) {
+      List<Widget> cells = [];
+      for (int j = 0; j < 7; j++) {
+        if (i == 0 && j < firstDay) {
+          cells.add(Container()); // Empty cell
+        } else if (date > daysInMonth) {
+          cells.add(Container()); // Empty cell
         } else {
-          cellWidget = Text(date.toString()); // Regular date
-        }
+          String shift = '';
+          bool isHoliday = false;
+          if (data.containsKey(months[currentDate.month - 1]) &&
+              data[months[currentDate.month - 1]]
+                  .containsKey(date.toString())) {
+            shift =
+                data[months[currentDate.month - 1]][date.toString()]['shift'];
+            isHoliday = data[months[currentDate.month - 1]][date.toString()]
+                ['is_holiday'];
+          }
 
-        cells.add(
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(5),
+          Widget cellWidget;
+          if (isHoliday) {
+            cellWidget = Container(
+              margin: EdgeInsets.all(2),
+              height: 40,
+              width: 40,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Icon(
+                        Icons.star,
+                        color: Colors.yellow,
+                        size: 15,
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                    ],
+                  ),
+                  Text(date.toString())
+                ],
+              ),
+            );
+          } else if (shift == 'Morning') {
+            cellWidget = Container(
+              margin: EdgeInsets.all(2),
+              height: 40,
+              width: 40,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Icon(
+                        Icons.wb_sunny,
+                        color: Colors.orange,
+                        size: 15,
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                    ],
+                  ),
+                  Text(date.toString())
+                ],
+              ),
+            );
+          } else if (shift == 'Night') {
+            cellWidget = cellWidget = Container(
+              margin: EdgeInsets.all(2),
+              height: 40,
+              width: 40,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Icon(
+                        Icons.nights_stay,
+                        color: Colors.blue,
+                        size: 15,
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                    ],
+                  ),
+                  Text(date.toString())
+                ],
+              ),
+            );
+          } else {
+            cellWidget = cellWidget = Container(
+              margin: EdgeInsets.all(2),
+              height: 40,
+              width: 40,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                    ],
+                  ),
+                  Text(date.toString())
+                ],
+              ),
+            );
+          }
+
+          cells.add(
+            Container(
+              margin: EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                //borderRadius: BorderRadius.circular(5),
+              ),
+              child: Center(
+                child: cellWidget,
+              ),
             ),
-            child: Center(
-              child: cellWidget,
-            ),
-          ),
-        );
-        date++;
+          );
+          date++;
+        }
       }
+      rows.add(TableRow(children: cells));
     }
-    rows.add(TableRow(children: cells));
+    return rows;
   }
-  return rows;
 }
 
+class Screen2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Screen 2'),
+      ),
+      body: Center(
+        child: Text('Screen 2 Content'),
+      ),
+    );
+  }
+}
 
+class Screen3 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Screen 3'),
+      ),
+      body: Center(
+        child: Text('Screen 3 Content'),
+      ),
+    );
+  }
+}
 
-
+class Screen4 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Screen 4'),
+      ),
+      body: Center(
+        child: Text('Screen 4 Content'),
+      ),
+    );
+  }
 }
