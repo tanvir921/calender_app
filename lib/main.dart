@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
   runApp(CalendarApp());
@@ -10,7 +11,7 @@ class CalendarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Calendar',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
@@ -44,6 +45,10 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        unselectedItemColor: Colors.black,
+        unselectedLabelStyle: TextStyle(color: Colors.blue),
+        selectedItemColor: Colors.purple,
+        selectedLabelStyle: TextStyle(color: Colors.purple),
         onTap: _onTabTapped,
         currentIndex: _currentIndex,
         items: const [
@@ -268,23 +273,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                        size: 15,
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                    ],
+                  Icon(
+                    Icons.star,
+                    color: Colors.yellow,
+                    size: 15,
                   ),
-                  Text(date.toString())
+                  Text(
+                    date.toString(),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  )
                 ],
               ),
             );
@@ -297,23 +294,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Icon(
-                        Icons.wb_sunny,
-                        color: Colors.orange,
-                        size: 15,
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                    ],
+                  const Icon(
+                    Icons.wb_sunny,
+                    color: Colors.orange,
+                    size: 15,
                   ),
-                  Text(date.toString())
+                  Text(
+                    date.toString(),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  )
                 ],
               ),
             );
@@ -326,23 +315,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Icon(
-                        Icons.nights_stay,
-                        color: Colors.blue,
-                        size: 15,
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                    ],
+                  const Icon(
+                    Icons.nights_stay,
+                    color: Colors.blue,
+                    size: 15,
                   ),
-                  Text(date.toString())
+                  Text(
+                    date.toString(),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  )
                 ],
               ),
             );
@@ -369,7 +350,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  Text(date.toString())
+                  Text(
+                    date.toString(),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  )
                 ],
               ),
             );
@@ -379,7 +363,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               margin: EdgeInsets.all(2),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
+                color: Colors.white,
+                border: Border.all(color: isHoliday ? Colors.red : Colors.grey),
                 //borderRadius: BorderRadius.circular(5),
               ),
               child: Center(
@@ -399,13 +384,32 @@ class _HomeScreenState extends State<HomeScreen> {
 class Screen2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    WebViewController controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.startsWith('https://workflow.mew.gov.kw')) {
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('https://workflow.mew.gov.kw'));
     return Scaffold(
       appBar: AppBar(
         title: Text('Screen 2'),
       ),
-      body: Center(
-        child: Text('Screen 2 Content'),
-      ),
+      body: WebViewWidget(controller: controller),
     );
   }
 }
@@ -413,13 +417,33 @@ class Screen2 extends StatelessWidget {
 class Screen3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    WebViewController controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url
+                .startsWith('https://procurement.mew.gov.kw/Account/Login')) {
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('https://procurement.mew.gov.kw/Account/Login'));
     return Scaffold(
       appBar: AppBar(
-        title: Text('Screen 3'),
+        title: Text('Screen 2'),
       ),
-      body: Center(
-        child: Text('Screen 3 Content'),
-      ),
+      body: WebViewWidget(controller: controller),
     );
   }
 }
@@ -427,13 +451,34 @@ class Screen3 extends StatelessWidget {
 class Screen4 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    WebViewController controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.startsWith(
+                'https://portal.csc.gov.kw/webcenter/portal/CSCPortal')) {
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(
+          Uri.parse('https://portal.csc.gov.kw/webcenter/portal/CSCPortal'));
     return Scaffold(
       appBar: AppBar(
-        title: Text('Screen 4'),
+        title: Text('Screen 2'),
       ),
-      body: Center(
-        child: Text('Screen 4 Content'),
-      ),
+      body: WebViewWidget(controller: controller),
     );
   }
 }
