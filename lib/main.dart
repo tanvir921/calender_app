@@ -32,6 +32,7 @@ class _MainScreenState extends State<MainScreen> {
     Screen2(),
     Screen3(),
     Screen4(),
+    Screen5(),
   ];
 
   void _onTabTapped(int index) {
@@ -57,12 +58,16 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
+            icon: Icon(Icons.public),
+            label: 'Workflow',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
+            icon: Icon(Icons.public),
+            label: 'Procurement',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.public),
+            label: 'CSC Portal',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
@@ -203,11 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: 20),
-            Text(
-              "${months[currentDate.month - 1]} ${currentDate.year}",
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            const SizedBox(height: 50),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -215,11 +216,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.chevron_left),
                   onPressed: previousMonth,
                 ),
+                Text(
+                  "${months[currentDate.month - 1]} ${currentDate.year}",
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
+                ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
                   onPressed: nextMonth,
                 ),
               ],
+            ),
+            SizedBox(
+              height: 30,
             ),
             Table(
               children: [
@@ -231,6 +240,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 20),
+            Container(
+              height: 130,
+              margin: EdgeInsets.only(left: 5, right: 5),
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: NetworkImage(
+                          'https://3c5239fcccdc41677a03-1135555c8dfc8b32dc5b4bc9765d8ae5.ssl.cf1.rackcdn.com/22-11-22-BANS-advertising-banner-1025x325-riot.jpg'))),
+            )
           ],
         ),
       ),
@@ -407,7 +425,8 @@ class Screen2 extends StatelessWidget {
       ..loadRequest(Uri.parse('https://workflow.mew.gov.kw'));
     return Scaffold(
       appBar: AppBar(
-        title: Text('Screen 2'),
+        title: Text('Mewshift'),
+        centerTitle: true,
       ),
       body: WebViewWidget(controller: controller),
     );
@@ -441,7 +460,8 @@ class Screen3 extends StatelessWidget {
       ..loadRequest(Uri.parse('https://procurement.mew.gov.kw/Account/Login'));
     return Scaffold(
       appBar: AppBar(
-        title: Text('Screen 2'),
+        title: Text('Mewshift'),
+        centerTitle: true,
       ),
       body: WebViewWidget(controller: controller),
     );
@@ -476,9 +496,22 @@ class Screen4 extends StatelessWidget {
           Uri.parse('https://portal.csc.gov.kw/webcenter/portal/CSCPortal'));
     return Scaffold(
       appBar: AppBar(
-        title: Text('Screen 2'),
+        title: Text('Mewshift'),
+        centerTitle: true,
       ),
       body: WebViewWidget(controller: controller),
     );
+  }
+}
+
+class Screen5 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Mewshift'),
+          centerTitle: true,
+        ),
+        body: Center());
   }
 }
