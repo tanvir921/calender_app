@@ -9,7 +9,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool shiftPattern = false;
-  bool showHolidays = false;
+  bool showHolidays = Constants.showHolidays;
   String language = 'English';
 
   Color nightShiftColor = Constants.nightShiftColor;
@@ -24,13 +24,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     await Constants.loadMorningShiftColor();
     await Constants.loadNightShiftColor();
+    await Constants.loadShowHolidays();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       morningShiftColor = Constants.morningShiftColor;
       nightShiftColor = Constants.nightShiftColor;
+      showHolidays = Constants.showHolidays;
       language = prefs.getString('language') ?? 'English';
       shiftPattern = prefs.getBool('shiftPattern') ?? false;
-      showHolidays = prefs.getBool('showHolidays') ?? false;
     });
   }
 
@@ -44,11 +45,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setBool('shiftPattern', value);
   }
 
-  Future<void> _saveShowHolidays(bool value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('showHolidays', value);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,35 +53,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: <Widget>[
-          ListTile(
-            title: Text('Language'),
-            trailing: DropdownButton<String>(
-              value: language,
-              onChanged: (String? newValue) {
-                setState(() {
-                  language = newValue ?? 'English';
-                  _saveLanguage(language);
-                });
-              },
-              items: <String>['English', 'Español', '中文']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-          ),
-          SwitchListTile(
-            title: Text('Shift Pattern'),
-            value: shiftPattern,
-            onChanged: (bool value) {
-              setState(() {
-                shiftPattern = value;
-                _saveShiftPattern(value);
-              });
-            },
-          ),
+          // ListTile(
+          //   title: Text('Language'),
+          //   trailing: DropdownButton<String>(
+          //     value: language,
+          //     onChanged: (String? newValue) {
+          //       setState(() {
+          //         language = newValue ?? 'English';
+          //         _saveLanguage(language);
+          //       });
+          //     },
+          //     items: <String>['English', 'Español', '中文']
+          //         .map<DropdownMenuItem<String>>((String value) {
+          //       return DropdownMenuItem<String>(
+          //         value: value,
+          //         child: Text(value),
+          //       );
+          //     }).toList(),
+          //   ),
+          // ),
+          // SwitchListTile(
+          //   title: Text('Shift Pattern'),
+          //   value: shiftPattern,
+          //   onChanged: (bool value) {
+          //     setState(() {
+          //       shiftPattern = value;
+          //       _saveShiftPattern(value);
+          //     });
+          //   },
+          // ),
           ListTile(
             title: Text('Morning Shift Color'),
             trailing: DropdownButton<Color>(
@@ -150,18 +146,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (bool value) {
               setState(() {
                 showHolidays = value;
-                _saveShowHolidays(value);
+                Constants.saveShowHolidays(value);
               });
             },
           ),
-          ListTile(
-            title: Text('Shift Reminder'),
-            subtitle: Text('Remind me before On Time Alarm'),
-            trailing: Icon(Icons.keyboard_arrow_right),
-            onTap: () {
-              // Navigate to shift reminder settings
-            },
-          ),
+          // ListTile(
+          //   title: Text('Shift Reminder'),
+          //   subtitle: Text('Remind me before On Time Alarm'),
+          //   trailing: Icon(Icons.keyboard_arrow_right),
+          //   onTap: () {
+          //     // Navigate to shift reminder settings
+          //   },
+          // ),
         ],
       ),
     );

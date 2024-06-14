@@ -6,13 +6,14 @@ class Constants {
   static const String morningShiftColorKey = "morningShiftColor";
   static const String nightShiftColorKey = "nightShiftColor";
   static Color morningShiftColor = Color(0xFF2697FF);
-  static  Color nightShiftColor = Color.fromARGB(255, 72, 75, 92);
+  static  Color nightShiftColor = Color(0xff484b5c);
+   static bool showHolidays = false;
 
   static List<Color> predefinedColors = [
     Color(0xff4caf50),
     Color(0xff2697ff),
     Color(0xfff44336),
-    Color(0xff484b5c)
+    Color(0xff484b5c),
   ];
 
   static Future<void> loadMorningShiftColor() async {
@@ -44,10 +45,10 @@ class Constants {
       if (predefinedColors.contains(loadedColor)) {
         nightShiftColor = loadedColor;
       } else {
-        nightShiftColor = Color(0xFF2697FF);  // Reset to default if not in predefined list
+        nightShiftColor = Color(0xff484b5c);  // Reset to default if not in predefined list
       }
     } else {
-      nightShiftColor = Color(0xFF2697FF);  // Set to default if no color saved
+      nightShiftColor = Color(0xff484b5c);  // Set to default if no color saved
     }
   }
 
@@ -55,4 +56,17 @@ class Constants {
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt(nightShiftColorKey, color.value);
   }
+
+  static Future<void> loadShowHolidays() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    showHolidays = prefs.getBool('showHolidays') ?? false;
+  }
+
+  static Future<void> saveShowHolidays(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('showHolidays', value);
+    showHolidays = value;
+  }
+
+  
 }
