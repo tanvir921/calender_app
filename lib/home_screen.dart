@@ -225,6 +225,8 @@ class _HomeScreenState extends State<HomeScreen>
   bool get wantKeepAlive => true;
 
   List<TableRow> generateCalendar() {
+    DateTime currentDate = this.currentDate;
+    
     List<TableRow> rows = [];
     int daysInMonth = DateTime(currentDate.year, currentDate.month + 1, 0).day;
     int firstDay = DateTime(currentDate.year, currentDate.month, 1).weekday %
@@ -344,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen>
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(
-                color: isHoliday && Constants.showHolidays
+                color: currentDate.day == date
                     ? Colors.red
                     : Colors.grey,
                 width: 2,
