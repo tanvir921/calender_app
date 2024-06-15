@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:calender_app/about_screen.dart';
 import 'package:calender_app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -108,113 +109,128 @@ class _HomeScreenState extends State<HomeScreen>
       appBar: AppBar(
         title: const Text('Mewshift'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.info_outline),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (builder) => AboutScreen())),
+          )
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: ['A', 'B', 'C', 'D'].map((category) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedCategory = category;
-                        loadCalendar(selectedCategory, selectedYear);
-                      });
-                    },
-                    child: Container(
-                      height: 30,
-                      width: 60,
-                      margin: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: data['category'] == category
-                            ? Colors.purple
-                            : Colors.white,
-                        border: Border.all(
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+            image: DecorationImage(
+          image: AssetImage('assets/images/bg.png'),
+          fit: BoxFit.cover,
+          opacity: 0.3,
+        )),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: ['A', 'B', 'C', 'D'].map((category) {
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedCategory = category;
+                          loadCalendar(selectedCategory, selectedYear);
+                        });
+                      },
+                      child: Container(
+                        height: 30,
+                        width: 60,
+                        margin: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
                           color: data['category'] == category
-                              ? Colors.purple
-                              : Colors.black,
-                        ),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Center(
-                        child: Text(
-                          category,
-                          style: TextStyle(
+                              ? Colors.blue
+                              : Colors.white,
+                          border: Border.all(
                             color: data['category'] == category
-                                ? Colors.white
+                                ? Colors.blue
                                 : Colors.black,
+                          ),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Center(
+                          child: Text(
+                            category,
+                            style: TextStyle(
+                              color: data['category'] == category
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 20),
-              DropdownButton<int>(
-                value: selectedYear,
-                items: years.map((year) {
-                  return DropdownMenuItem<int>(
-                    value: year,
-                    child: Text(year.toString()),
-                  );
-                }).toList(),
-                onChanged: (int? newYear) {
-                  if (newYear != null) {
-                    setState(() {
-                      selectedYear = newYear;
-                      currentDate = DateTime(selectedYear, currentDate.month);
-                      loadCalendar(selectedCategory, selectedYear);
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.chevron_left),
-                    onPressed: previousMonth,
-                  ),
-                  Text(
-                    "${months[currentDate.month - 1]} ${currentDate.year}",
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.chevron_right),
-                    onPressed: nextMonth,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-              Table(
-                children: [
-                  TableRow(
-                    children:
-                        days.map((day) => Center(child: Text(day))).toList(),
-                  ),
-                  ...generateCalendar(),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Container(
-                height: 130,
-                margin: const EdgeInsets.only(left: 5, right: 5),
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(
-                      'https://3c5239fcccdc41677a03-1135555c8dfc8b32dc5b4bc9765d8ae5.ssl.cf1.rackcdn.com/22-11-22-BANS-advertising-banner-1025x325-riot.jpg',
-                    ),
-                  ),
+                    );
+                  }).toList(),
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+                DropdownButton<int>(
+                  value: selectedYear,
+                  items: years.map((year) {
+                    return DropdownMenuItem<int>(
+                      value: year,
+                      child: Text(year.toString()),
+                    );
+                  }).toList(),
+                  onChanged: (int? newYear) {
+                    if (newYear != null) {
+                      setState(() {
+                        selectedYear = newYear;
+                        currentDate = DateTime(selectedYear, currentDate.month);
+                        loadCalendar(selectedCategory, selectedYear);
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.chevron_left),
+                      onPressed: previousMonth,
+                    ),
+                    Text(
+                      "${months[currentDate.month - 1]} ${currentDate.year}",
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.chevron_right),
+                      onPressed: nextMonth,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                Table(
+                  children: [
+                    TableRow(
+                      children:
+                          days.map((day) => Center(child: Text(day))).toList(),
+                    ),
+                    ...generateCalendar(),
+                  ],
+                ),
+                // const SizedBox(height: 20),
+                // Container(
+                //   height: 130,
+                //   margin: const EdgeInsets.only(left: 5, right: 5),
+                //   decoration: BoxDecoration(
+                //     image: DecorationImage(
+                //       fit: BoxFit.cover,
+                //       image: NetworkImage(
+                //         'https://3c5239fcccdc41677a03-1135555c8dfc8b32dc5b4bc9765d8ae5.ssl.cf1.rackcdn.com/22-11-22-BANS-advertising-banner-1025x325-riot.jpg',
+                //       ),
+                //     ),
+                //   ),
+                // ),
+              ],
+            ),
           ),
         ),
       ),
@@ -226,7 +242,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   List<TableRow> generateCalendar() {
     DateTime currentDate = this.currentDate;
-    
+    DateTime today = DateTime.now();
+
     List<TableRow> rows = [];
     int daysInMonth = DateTime(currentDate.year, currentDate.month + 1, 0).day;
     int firstDay = DateTime(currentDate.year, currentDate.month, 1).weekday %
@@ -253,107 +270,174 @@ class _HomeScreenState extends State<HomeScreen>
           }
 
           Widget cellWidget;
-          if (isHoliday) {
+          // if (isHoliday) {
+          //   cellWidget = Container(
+          //     margin: const EdgeInsets.all(2),
+          //     height: 40,
+          //     width: 40,
+          //     child: Container(
+          //       decoration: BoxDecoration(
+          //         border: Border.all(
+          //           color: (currentDate.year == today.year &&
+          //                   currentDate.month == today.month &&
+          //                   date == today.day)
+          //               ? Colors.red
+          //               : Colors.transparent,
+          //           width: 2,
+          //         ),
+          //         shape: BoxShape.circle,
+          //       ),
+          //       child: Column(
+          //         mainAxisAlignment: MainAxisAlignment.center,
+          //         crossAxisAlignment: CrossAxisAlignment.center,
+          //         children: [
+          //           const Icon(
+          //             Icons.star,
+          //             color: Colors.yellow,
+          //             size: 15,
+          //           ),
+          //           Text(
+          //             date.toString(),
+          //             style: const TextStyle(
+          //               fontSize: 15,
+          //               fontWeight: FontWeight.bold,
+          //               color: Colors.red,
+          //             ),
+          //           ),
+          //         ],
+          //       ),
+          //     ),
+          //   );
+          // } else
+          if (shift == 'Morning') {
             cellWidget = Container(
-              margin: const EdgeInsets.all(2),
-              height: 40,
-              width: 40,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.star,
-                    color: Colors.yellow,
-                    size: 15,
-                  ),
-                  Text(
-                    date.toString(),
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            );
-          } else if (shift == 'Morning') {
-            cellWidget = Container(
-              margin: const EdgeInsets.all(2),
+              //margin: const EdgeInsets.all(2),
               height: 40,
               width: double.infinity,
               color: Constants.morningShiftColor.withOpacity(0.5),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.wb_sunny,
-                    color: Colors.orange,
-                    size: 15,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: (currentDate.year == today.year &&
+                            currentDate.month == today.month &&
+                            date == today.day)
+                        ? Colors.red
+                        : Colors.transparent,
+                    width: 2,
                   ),
-                  Text(
-                    date.toString(),
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                ],
+                  shape: BoxShape.circle,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.wb_sunny,
+                      color: Colors.orange,
+                      size: 15,
+                    ),
+                    Text(
+                      date.toString(),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: isHoliday && Constants.showHolidays ? Colors.red : Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           } else if (shift == 'Night') {
             cellWidget = Container(
-              margin: const EdgeInsets.all(2),
+              //margin: const EdgeInsets.all(2),
               height: 40,
               width: double.infinity,
               color: Constants.nightShiftColor.withOpacity(0.5),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.nights_stay,
-                    color: Colors.blue,
-                    size: 15,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: (currentDate.year == today.year &&
+                            currentDate.month == today.month &&
+                            date == today.day)
+                        ? Colors.red
+                        : Colors.transparent,
+                    width: 2,
                   ),
-                  Text(
-                    date.toString(),
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                ],
+                  shape: BoxShape.circle,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.nights_stay,
+                      color: Colors.white,
+                      size: 15,
+                    ),
+                    Text(
+                      date.toString(),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                         color: isHoliday && Constants.showHolidays ? Colors.red : Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           } else {
             cellWidget = Container(
-              margin: const EdgeInsets.all(2),
+              //margin: const EdgeInsets.all(2),
               height: 40,
               width: 40,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 15), // Empty space to align date
-                  Text(
-                    date.toString(),
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.bold),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: (currentDate.year == today.year &&
+                            currentDate.month == today.month &&
+                            date == today.day)
+                        ? Colors.red
+                        : Colors.transparent,
+                    width: 2,
                   ),
-                ],
+                  shape: BoxShape.circle,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 15), // Empty space to align date
+                    Text(
+                      date.toString(),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: isHoliday && Constants.showHolidays ? Colors.red : Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }
 
-          cells.add(Container(
-            margin: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(
-                color: currentDate.day == date
-                    ? Colors.red
-                    : Colors.grey,
-                width: 2,
+          cells.add(
+            Container(
+              margin: const EdgeInsets.all(1),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                //shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.grey,
+                  width: 1,
+                ),
+                //borderRadius: BorderRadius.circular(5),
               ),
+              child: Center(child: cellWidget),
             ),
-            child: Center(child: cellWidget),
-          ));
+          );
           date++;
         }
       }

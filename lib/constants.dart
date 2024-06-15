@@ -2,12 +2,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 
 class Constants {
-  static const String appName = "Calendar App";
+  static const String appName = "Mewshift";
+  static const String appVersion = "1.0.0";
+
   static const String morningShiftColorKey = "morningShiftColor";
   static const String nightShiftColorKey = "nightShiftColor";
   static Color morningShiftColor = Color(0xFF2697FF);
   static  Color nightShiftColor = Color(0xff484b5c);
-   static bool showHolidays = false;
+   static bool showHolidays = true;
 
   static List<Color> predefinedColors = [
     Color(0xff4caf50),

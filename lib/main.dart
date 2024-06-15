@@ -54,30 +54,41 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         unselectedItemColor: Colors.black,
         unselectedLabelStyle: const TextStyle(color: Colors.blue),
-        selectedItemColor: Colors.purple,
-        selectedLabelStyle: const TextStyle(color: Colors.purple),
+        selectedItemColor: Colors.blue,
+        selectedLabelStyle: const TextStyle(color: Colors.blue),
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
         onTap: _onTabTapped,
         currentIndex: _currentIndex,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'الصفحة الرئيسية',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.public),
-            label: 'Workflow',
+            icon: Image.asset(
+              'assets/images/bg.png',
+              height: 25,
+            ),
+            label: 'المراسلات',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.public),
-            label: 'Procurement',
+            icon: Image.asset(
+              'assets/images/bg.png',
+              height: 25,
+            ),
+            label: 'الشراء الالي',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.public),
-            label: 'CSC Portal',
+            icon: Image.asset(
+              'assets/images/3.png',
+              height: 25,
+            ),
+            label: 'ديوان الخدمه المدنيه',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Settings',
+            label: 'الاعدادات',
           ),
         ],
       ),
