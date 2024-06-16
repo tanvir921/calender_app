@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen>
     super.build(context); // Add this line
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mewshift'),
+        title: const Text('Mewshifts'),
         centerTitle: true,
         actions: [
           IconButton(

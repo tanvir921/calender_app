@@ -24,19 +24,17 @@ class WebviewScreen extends StatelessWidget {
           onHttpError: (HttpResponseError error) {},
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith(
-                url)) {
+            if (request.url.startsWith(url)) {
               return NavigationDecision.prevent;
             }
             return NavigationDecision.navigate;
           },
         ),
       )
-      ..loadRequest(
-          Uri.parse(url));
+      ..loadRequest(Uri.parse(url));
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mewshift'),
+        title: Text('Mewshifts'),
         centerTitle: true,
       ),
       body: WebViewWidget(controller: controller),

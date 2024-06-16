@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 
 class Constants {
-  static const String appName = "Mewshift";
+  static const String appName = "Mewshifts";
   static const String appVersion = "1.0.0";
 
   static const String morningShiftColorKey = "morningShiftColor";
