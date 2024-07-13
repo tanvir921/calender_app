@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "682679510328",
+    "project_id": "smart-chadaha",
+    "storage_bucket": "smart-chadaha.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:682679510328:android:74630d6c5fa26dba864dcd",
+        "android_client_info": {
+          "package_name": "com.smartchadaha.admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "682679510328-msvn4o03g5c5fu7tlajaguk586q57d1n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0gkbuQFqeBFCX1Nt9TaADOFxyDBhRXAs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "682679510328-msvn4o03g5c5fu7tlajaguk586q57d1n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:682679510328:android:beae0760d2234154864dcd",
+        "android_client_info": {
+          "package_name": "com.smartchadaha.user"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "682679510328-msvn4o03g5c5fu7tlajaguk586q57d1n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0gkbuQFqeBFCX1Nt9TaADOFxyDBhRXAs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "682679510328-msvn4o03g5c5fu7tlajaguk586q57d1n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

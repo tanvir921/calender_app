@@ -53,35 +53,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: <Widget>[
-          // ListTile(
-          //   title: Text('Language'),
-          //   trailing: DropdownButton<String>(
-          //     value: language,
-          //     onChanged: (String? newValue) {
-          //       setState(() {
-          //         language = newValue ?? 'English';
-          //         _saveLanguage(language);
-          //       });
-          //     },
-          //     items: <String>['English', 'Español', '中文']
-          //         .map<DropdownMenuItem<String>>((String value) {
-          //       return DropdownMenuItem<String>(
-          //         value: value,
-          //         child: Text(value),
-          //       );
-          //     }).toList(),
-          //   ),
-          // ),
-          // SwitchListTile(
-          //   title: Text('Shift Pattern'),
-          //   value: shiftPattern,
-          //   onChanged: (bool value) {
-          //     setState(() {
-          //       shiftPattern = value;
-          //       _saveShiftPattern(value);
-          //     });
-          //   },
-          // ),
           ListTile(
             title: Text('Morning Shift Color'),
             trailing: DropdownButton<Color>(
@@ -150,14 +121,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               });
             },
           ),
-          // ListTile(
-          //   title: Text('Shift Reminder'),
-          //   subtitle: Text('Remind me before On Time Alarm'),
-          //   trailing: Icon(Icons.keyboard_arrow_right),
-          //   onTap: () {
-          //     // Navigate to shift reminder settings
-          //   },
-          // ),
         ],
       ),
     );

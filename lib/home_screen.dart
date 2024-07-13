@@ -3,6 +3,7 @@ import 'package:calender_app/about_screen.dart';
 import 'package:calender_app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -33,19 +34,16 @@ class _HomeScreenState extends State<HomeScreen>
 
   List<String> days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  List<int> years =
-      List.generate(10, (index) => DateTime.now().year - 5 + index);
-
   @override
   void initState() {
     super.initState();
     _loadSettingsAndCalendar();
+    _loadNotesFromSharedPreferences();
   }
 
   Future<void> _loadSettingsAndCalendar() async {
-    await Constants
-        .loadMorningShiftColor(); // Load the saved morning shift color
-    await Constants.loadNightShiftColor(); // Load the saved night shift color
+    await Constants.loadMorningShiftColor();
+    await Constants.loadNightShiftColor();
     await Constants.loadShowHolidays();
     loadCalendar(selectedCategory, selectedYear);
   }
@@ -54,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen>
     final res = await fetchCalendarData(category, year);
     setState(() {
       data = res;
-      data['category'] = category; // Set the category here
+      data['category'] = category;
     });
   }
 
@@ -72,11 +70,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   void previousMonth() {
     setState(() {
-      if (currentDate.month == 1) {
-        // If current month is January, move to December of the previous year
-        currentDate = DateTime(currentDate.year - 1, 12);
-      } else {
-        // Move to the previous month of the current year
+      if (currentDate.month > 1) {
         currentDate = DateTime(currentDate.year, currentDate.month - 1);
       }
       loadCalendar(selectedCategory, currentDate.year);
@@ -85,11 +79,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   void nextMonth() {
     setState(() {
-      if (currentDate.month == 12) {
-        // If current month is December, move to January of the next year
-        currentDate = DateTime(currentDate.year + 1, 1);
-      } else {
-        // Move to the next month of the current year
+      if (currentDate.month < 12) {
         currentDate = DateTime(currentDate.year, currentDate.month + 1);
       }
       loadCalendar(selectedCategory, currentDate.year);
@@ -102,9 +92,78 @@ class _HomeScreenState extends State<HomeScreen>
     });
   }
 
+  Map<String, List<String>> notes = {};
+
+
+  final _prefs = SharedPreferences.getInstance();
+
+Future<void> _saveNotesToSharedPreferences() async {
+  final prefs = await _prefs;
+  prefs.setString('notes', jsonEncode(notes));
+}
+
+Future<void> _loadNotesFromSharedPreferences() async {
+  final prefs = await _prefs;
+  final notesString = prefs.getString('notes');
+  if (notesString != null) {
+    notes = jsonDecode(notesString).cast<String, List<String>>();
+  }
+}
+
+
+  void _showNoteDialog(BuildContext context, String date) {
+  List<String> existingNotes = notes[date] ?? [];
+
+  TextEditingController noteController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Notes for $date'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Display existing notes
+            for (String note in existingNotes)
+              Text(note),
+            TextField(
+              controller: noteController,
+              decoration: InputDecoration(hintText: 'Add a note'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: Text('Save'),
+            onPressed: () {
+              String newNote = noteController.text.trim();
+              if (newNote.isNotEmpty) {
+                setState(() {
+                  notes[date] = (notes[date] ?? [])..add(newNote);
+                  // Save notes to SharedPreferences
+                  _saveNotesToSharedPreferences();
+                });
+              }
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Add this line
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mewshifts'),
@@ -112,7 +171,8 @@ class _HomeScreenState extends State<HomeScreen>
         actions: [
           IconButton(
             icon: Icon(Icons.info_outline),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (builder) => AboutScreen())),
+            onPressed: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (builder) => AboutScreen())),
           )
         ],
       ),
@@ -170,13 +230,16 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 const SizedBox(height: 20),
                 DropdownButton<int>(
-                  value: selectedYear,
-                  items: years.map((year) {
+                  items: List<int>.generate(DateTime.now().year - 2024 + 1,
+                          (index) => 2024 + index)
+                      .where((year) => year <= DateTime.now().year)
+                      .map((year) {
                     return DropdownMenuItem<int>(
                       value: year,
                       child: Text(year.toString()),
                     );
                   }).toList(),
+                  value: selectedYear,
                   onChanged: (int? newYear) {
                     if (newYear != null) {
                       setState(() {
@@ -216,19 +279,6 @@ class _HomeScreenState extends State<HomeScreen>
                     ...generateCalendar(),
                   ],
                 ),
-                // const SizedBox(height: 20),
-                // Container(
-                //   height: 130,
-                //   margin: const EdgeInsets.only(left: 5, right: 5),
-                //   decoration: BoxDecoration(
-                //     image: DecorationImage(
-                //       fit: BoxFit.cover,
-                //       image: NetworkImage(
-                //         'https://3c5239fcccdc41677a03-1135555c8dfc8b32dc5b4bc9765d8ae5.ssl.cf1.rackcdn.com/22-11-22-BANS-advertising-banner-1025x325-riot.jpg',
-                //       ),
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ),
@@ -241,208 +291,177 @@ class _HomeScreenState extends State<HomeScreen>
   bool get wantKeepAlive => true;
 
   List<TableRow> generateCalendar() {
-    DateTime currentDate = this.currentDate;
-    DateTime today = DateTime.now();
+  DateTime currentDate = this.currentDate;
+  DateTime today = DateTime.now();
 
-    List<TableRow> rows = [];
-    int daysInMonth = DateTime(currentDate.year, currentDate.month + 1, 0).day;
-    int firstDay = DateTime(currentDate.year, currentDate.month, 1).weekday %
-        7; // Adjusting firstDay calculation
+  List<TableRow> rows = [];
+  int daysInMonth = DateTime(currentDate.year, currentDate.month + 1, 0).day;
+  int firstDay = DateTime(currentDate.year, currentDate.month, 1).weekday % 7;
 
-    int date = 1;
-    for (int i = 0; i < 6; i++) {
-      List<Widget> cells = [];
-      for (int j = 0; j < 7; j++) {
-        if (i == 0 && j < firstDay) {
-          cells.add(Container()); // Empty cell
-        } else if (date > daysInMonth) {
-          cells.add(Container()); // Empty cell
+  int date = 1;
+  for (int i = 0; i < 6; i++) {
+    List<Widget> cells = [];
+    for (int j = 0; j < 7; j++) {
+      if (i == 0 && j < firstDay) {
+        cells.add(Container());
+      } else if (date > daysInMonth) {
+        cells.add(Container());
+      } else {
+        String shift = '';
+        bool isHoliday = false;
+        if (data.containsKey(months[currentDate.month - 1]) &&
+            data[months[currentDate.month - 1]]
+                .containsKey(date.toString())) {
+          shift =
+              data[months[currentDate.month - 1]][date.toString()]['shift'];
+          isHoliday = data[months[currentDate.month - 1]][date.toString()]
+              ['is_holiday'];
+        }
+
+        Widget cellWidget;
+
+        if (shift == 'Morning') {
+          cellWidget = Container(
+            height: 40,
+            width: double.infinity,
+            color: Constants.morningShiftColor.withOpacity(0.5),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: (currentDate.year == today.year &&
+                          currentDate.month == today.month &&
+                          date == today.day)
+                      ? Colors.red
+                      : Colors.transparent,
+                  width: 2,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.wb_sunny,
+                    color: Colors.orange,
+                    size: 15,
+                  ),
+                  Text(
+                    date.toString(),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: isHoliday && Constants.showHolidays
+                          ? Colors.red
+                          : Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        } else if (shift == 'Night') {
+          cellWidget = Container(
+            height: 40,
+            width: double.infinity,
+            color: Constants.nightShiftColor.withOpacity(0.5),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: (currentDate.year == today.year &&
+                          currentDate.month == today.month &&
+                          date == today.day)
+                      ? Colors.red
+                      : Colors.transparent,
+                  width: 2,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.nights_stay,
+                    color: Colors.white,
+                    size: 15,
+                  ),
+                  Text(
+                    date.toString(),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: isHoliday && Constants.showHolidays
+                          ? Colors.red
+                          : Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
         } else {
-          String shift = '';
-          bool isHoliday = false;
-          if (data.containsKey(months[currentDate.month - 1]) &&
-              data[months[currentDate.month - 1]]
-                  .containsKey(date.toString())) {
-            shift =
-                data[months[currentDate.month - 1]][date.toString()]['shift'];
-            isHoliday = data[months[currentDate.month - 1]][date.toString()]
-                ['is_holiday'];
-          }
+          cellWidget = Container(
+            height: 40,
+            width: 40,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: (currentDate.year == today.year &&
+                          currentDate.month == today.month &&
+                          date == today.day)
+                      ? Colors.red
+                      : Colors.transparent,
+                  width: 2,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 15),
+                  Text(
+                    date.toString(),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: isHoliday && Constants.showHolidays
+                          ? Colors.red
+                          : Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
 
-          Widget cellWidget;
-          // if (isHoliday) {
-          //   cellWidget = Container(
-          //     margin: const EdgeInsets.all(2),
-          //     height: 40,
-          //     width: 40,
-          //     child: Container(
-          //       decoration: BoxDecoration(
-          //         border: Border.all(
-          //           color: (currentDate.year == today.year &&
-          //                   currentDate.month == today.month &&
-          //                   date == today.day)
-          //               ? Colors.red
-          //               : Colors.transparent,
-          //           width: 2,
-          //         ),
-          //         shape: BoxShape.circle,
-          //       ),
-          //       child: Column(
-          //         mainAxisAlignment: MainAxisAlignment.center,
-          //         crossAxisAlignment: CrossAxisAlignment.center,
-          //         children: [
-          //           const Icon(
-          //             Icons.star,
-          //             color: Colors.yellow,
-          //             size: 15,
-          //           ),
-          //           Text(
-          //             date.toString(),
-          //             style: const TextStyle(
-          //               fontSize: 15,
-          //               fontWeight: FontWeight.bold,
-          //               color: Colors.red,
-          //             ),
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //   );
-          // } else
-          if (shift == 'Morning') {
-            cellWidget = Container(
-              //margin: const EdgeInsets.all(2),
-              height: 40,
-              width: double.infinity,
-              color: Constants.morningShiftColor.withOpacity(0.5),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: (currentDate.year == today.year &&
-                            currentDate.month == today.month &&
-                            date == today.day)
-                        ? Colors.red
-                        : Colors.transparent,
-                    width: 2,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.wb_sunny,
-                      color: Colors.orange,
-                      size: 15,
-                    ),
-                    Text(
-                      date.toString(),
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: isHoliday && Constants.showHolidays ? Colors.red : Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          } else if (shift == 'Night') {
-            cellWidget = Container(
-              //margin: const EdgeInsets.all(2),
-              height: 40,
-              width: double.infinity,
-              color: Constants.nightShiftColor.withOpacity(0.5),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: (currentDate.year == today.year &&
-                            currentDate.month == today.month &&
-                            date == today.day)
-                        ? Colors.red
-                        : Colors.transparent,
-                    width: 2,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.nights_stay,
-                      color: Colors.white,
-                      size: 15,
-                    ),
-                    Text(
-                      date.toString(),
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                         color: isHoliday && Constants.showHolidays ? Colors.red : Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          } else {
-            cellWidget = Container(
-              //margin: const EdgeInsets.all(2),
-              height: 40,
-              width: 40,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: (currentDate.year == today.year &&
-                            currentDate.month == today.month &&
-                            date == today.day)
-                        ? Colors.red
-                        : Colors.transparent,
-                    width: 2,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 15), // Empty space to align date
-                    Text(
-                      date.toString(),
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: isHoliday && Constants.showHolidays ? Colors.red : Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          cells.add(
-            Container(
+        cells.add(
+          GestureDetector(
+            onTap: () {
+        String dateString = '${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${date.toString().padLeft(2, '0')}';
+        _showNoteDialog(context, dateString);
+      },
+            child: Container(
               margin: const EdgeInsets.all(1),
               decoration: BoxDecoration(
                 color: Colors.white,
-                //shape: BoxShape.circle,
                 border: Border.all(
                   color: Colors.grey,
                   width: 1,
                 ),
-                //borderRadius: BorderRadius.circular(5),
               ),
               child: Center(child: cellWidget),
             ),
-          );
-          date++;
-        }
+          ),
+        );
+        date++;
       }
-      rows.add(TableRow(children: cells));
     }
-    return rows;
+    rows.add(TableRow(children: cells));
   }
+  return rows;
+}
+
 }

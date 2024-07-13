@@ -61,7 +61,7 @@ class Constants {
 
   static Future<void> loadShowHolidays() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    showHolidays = prefs.getBool('showHolidays') ?? false;
+    showHolidays = prefs.getBool('showHolidays') ?? true;
   }
 
   static Future<void> saveShowHolidays(bool value) async {
