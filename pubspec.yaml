@@ -47,6 +47,7 @@ dependencies:
   sqflite: ^2.3.3+1
   path: ^1.9.0
   flutter_emoji: ^2.5.1
+  url_launcher: ^6.3.0
 
 
 dev_dependencies:
